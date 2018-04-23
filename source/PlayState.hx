@@ -150,6 +150,8 @@ class Enemy extends FlxSprite implements Target{
 			scale.x = scale.y = 1.0;
 		});
 		
+		FlxG.sound.play(AssetPaths.enemy_die__wav);
+		
 		hp--;
 		if(hp<=0){
 			visible = false;
@@ -306,6 +308,7 @@ class Bomb extends FlxSprite implements Target{
 	}
 	
 	public function onShot():Bool{
+		FlxG.sound.play(AssetPaths.explode__wav);
 		visible = false;
 		return false;
 	}
@@ -347,6 +350,7 @@ class Bomb extends FlxSprite implements Target{
 	
 	public function explode(){
 		function do_explode(?t, bump){
+			FlxG.sound.play(AssetPaths.explode__wav);
 			var bullets = bmgr.request(payload);
 			
 			for(i in 0...bullets.length){
@@ -428,11 +432,14 @@ class Ball extends FlxSprite{
 	}
 	public function hit():Bool{
 		hp--;
+		FlxG.sound.play(AssetPaths.hit_marble__wav);
 		speedLevel = 0;
 		FlxG.camera.flash(FlxColor.RED, 0.2);
 		animation.play('s$hp');
-		if (hp <= 0)
+		if (hp <= 0){
+			FlxG.sound.play(AssetPaths.hit_marble_2__wav);
 			return true;
+		}
 		return false;
 	}
 	
@@ -707,7 +714,7 @@ class PlayState extends FlxState
 		
 		txWaveLabel.text = "HP: 0";
 		
-		txTotalKills.x = 350;
+		txTotalKills.x = 300;
 		txTotalKills.y = 10;
 		
 		txTotalKills.text = "Kills: 0";
@@ -848,12 +855,19 @@ class PlayState extends FlxState
 	{
 		super.update(elapsed);
 		
+		if(FlxG.keys.justReleased.M){
+			if (FlxG.sound.volume != 0)
+				FlxG.sound.volume = 0;
+			else
+				FlxG.sound.volume = 100;
+		}
+		
 		var mpos = FlxG.mouse.getPosition();
 		
 		txCarriedKills.text = '$carried_kills';
 		txBallKills.text = '$ball_kills';
 		txTotalKills.text = 'Kills: $total_kills';
-		txWaveLabel.text = 'HP: $playerhp Wave: $wave';		
+		txWaveLabel.text = 'HP: $playerhp';
 		
 		txCarriedKills.x = mpos.x;
 		txCarriedKills.y = mpos.y - txCarriedKills.height;
@@ -922,6 +936,7 @@ class PlayState extends FlxState
 	}
 	
 	private function onMissed(){
+		FlxG.sound.play(AssetPaths.miss__wav);
 		misses_counter++;					
 		if(misses_counter > free_misses)
 			onDroppedCarries();
@@ -1146,11 +1161,13 @@ class PlayState extends FlxState
 		return ret;
 	}
 	
-	var playerhp = 1;
+	var playerhp = 10;
 	private function onHit(){
 		playerhp--;
 		if (playerhp <= 0)
 			onGameOver();
+		
+		FlxG.sound.play(AssetPaths.hit__wav, 1.0, false);
 			
 		onDroppedCarries();
 		camera.flash(FlxColor.RED, 0.1);
@@ -1265,6 +1282,7 @@ class PlayState extends FlxState
 		if(carried_kills >= price){
 			carried_kills -= price;
 			clip_size += 1;
+			FlxG.sound.play(AssetPaths.buy__wav);
 		}
 		
 		if (clip_size > upgrade_prices[0].length)
@@ -1279,6 +1297,7 @@ class PlayState extends FlxState
 			total_kills += price;
 			reload_time *= 0.75;
 			reload_level++;
+			FlxG.sound.play(AssetPaths.buy__wav);
 		}
 		if (reload_level >= upgrade_prices[1].length)
 			bar.maxed = true;
@@ -1291,6 +1310,7 @@ class PlayState extends FlxState
 			carried_kills -= price;
 			total_kills += price;
 			free_misses++;
+			FlxG.sound.play(AssetPaths.buy__wav);
 		}
 		if (free_misses > upgrade_prices[2].length)
 			bar.maxed = true;
@@ -1303,6 +1323,7 @@ class PlayState extends FlxState
 			carried_kills -= price;
 			total_kills += price;
 			gun_level++;
+			FlxG.sound.play(AssetPaths.buy__wav);
 		}
 		if (gun_level >= 3)
 			bar.maxed = true;
@@ -1315,6 +1336,7 @@ class PlayState extends FlxState
 			carried_kills -= price;
 			total_kills += price;
 			big_shot = true;
+			FlxG.sound.play(AssetPaths.buy__wav);
 		}
 		if (big_shot)
 			bar.maxed = true;
@@ -1328,7 +1350,6 @@ class PlayState extends FlxState
 		160,//ball_constant_speed
 		90,//ball_absorb_bombs
 		240 //ball_bigger
-		,2
 	];
 	/*
 	public var ball_absorb:Bool = false; //whether the ball will absorb bullets that it runs into

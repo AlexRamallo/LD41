@@ -164,6 +164,8 @@ class GameOverState extends FlxState
 		
 		if (FlxG.keys.justReleased.SPACE){
 			PlayState.reset_values();
+			FlxG.switchState(new PlayState());
+		}else if(FlxG.keys.justReleased.ESCAPE){
 			FlxG.resetGame();
 		}
 	}
